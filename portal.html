@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Said's Psykiatri Kunskapsstöd</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Source+Sans+3:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f1117;
+  --bg-card: #171923;
+  --bg-card-hover: #1e2133;
+  --border: #2a2d3a;
+  --text: #e2e4ea;
+  --text-muted: #8b8fa3;
+  --text-dim: #5c6072;
+  --accent: #34d399;
+  --accent-dim: #064e3b;
+  --accent-glow: rgba(52,211,153,0.12);
+  --podcast: #60a5fa;
+  --podcast-dim: #1e3a5f;
+  --video: #f472b6;
+  --video-dim: #5b2147;
+  --text-tag: #fbbf24;
+  --text-tag-dim: #5c4b13;
+  --info: #a78bfa;
+  --info-dim: #3b2d6b;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --transition: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:'Source Sans 3',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.7;
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ─── NOISE TEXTURE ─── */
+body::before{
+  content:'';position:fixed;top:0;left:0;width:100%;height:100%;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:0.4;
+}
+
+/* ─── HEADER ─── */
+.site-header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(15,17,23,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 2rem;
+}
+.header-inner{
+  max-width:1280px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  height:72px;
+}
+.logo{
+  font-family:'DM Serif Display',serif;
+  font-size:1.35rem;color:var(--text);
+  text-decoration:none;display:flex;align-items:center;gap:0.6rem;
+}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#059669);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;color:#fff;font-weight:700;
+}
+.logo span{color:var(--accent)}
+
+nav{display:flex;gap:0.25rem}
+nav a{
+  font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:500;
+  color:var(--text-muted);text-decoration:none;
+  padding:0.5rem 1rem;border-radius:var(--radius-sm);
+  transition:var(--transition);letter-spacing:0.02em;
+}
+nav a:hover,nav a.active{color:var(--accent);background:var(--accent-glow)}
+
+/* ─── HERO ─── */
+.hero{
+  max-width:1280px;margin:0 auto;padding:4rem 2rem 3rem;
+  text-align:center;
+}
+.hero h1{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(2.2rem,5vw,3.6rem);
+  line-height:1.15;margin-bottom:1rem;
+  background:linear-gradient(135deg,var(--text) 40%,var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero p{
+  font-size:1.15rem;color:var(--text-muted);max-width:680px;margin:0 auto 2rem;
+  line-height:1.7;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:0.5rem;
+  background:var(--bg-card);border:1px solid var(--border);
+  padding:0.45rem 1.1rem;border-radius:999px;
+  font-size:0.82rem;color:var(--text-muted);
+  font-family:'Outfit',sans-serif;
+}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+
+/* ─── MAIN LAYOUT ─── */
+main{max-width:1280px;margin:0 auto;padding:0 2rem 4rem}
+
+/* ─── TAB NAVIGATION (categories) ─── */
+.tab-bar{
+  display:flex;flex-wrap:wrap;gap:0.5rem;
+  margin-bottom:2.5rem;padding-bottom:1rem;
+  border-bottom:1px solid var(--border);
+}
+.tab-btn{
+  font-family:'Outfit',sans-serif;font-size:0.85rem;font-weight:500;
+  background:transparent;color:var(--text-muted);border:1px solid transparent;
+  padding:0.55rem 1.2rem;border-radius:999px;cursor:pointer;
+  transition:var(--transition);white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text);border-color:var(--border)}
+.tab-btn.active{
+  color:var(--accent);background:var(--accent-glow);
+  border-color:rgba(52,211,153,0.25);
+}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeUp 0.4s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ─── SECTION TITLES ─── */
+.section-title{
+  font-family:'DM Serif Display',serif;font-size:1.6rem;
+  margin-bottom:0.4rem;color:var(--text);
+}
+.section-subtitle{
+  color:var(--text-muted);font-size:0.95rem;margin-bottom:1.8rem;
+}
+
+/* ─── RESOURCE CARDS ─── */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(380px,1fr));
+  gap:1.2rem;margin-bottom:3rem;
+}
+.card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:1.5rem;
+  transition:var(--transition);position:relative;overflow:hidden;
+}
+.card:hover{
+  background:var(--bg-card-hover);border-color:rgba(52,211,153,0.2);
+  transform:translateY(-2px);box-shadow:var(--shadow);
+}
+.card-type{
+  display:inline-flex;align-items:center;gap:0.35rem;
+  font-family:'Outfit',sans-serif;font-size:0.72rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:0.08em;
+  padding:0.3rem 0.7rem;border-radius:999px;margin-bottom:0.9rem;
+}
+.card-type.podcast{background:var(--podcast-dim);color:var(--podcast)}
+.card-type.video{background:var(--video-dim);color:var(--video)}
+.card-type.text{background:var(--text-tag-dim);color:var(--text-tag)}
+.card-type.info{background:var(--info-dim);color:var(--info)}
+
+.card h3{
+  font-family:'DM Serif Display',serif;font-size:1.15rem;
+  line-height:1.35;margin-bottom:0.6rem;color:var(--text);
+}
+.card h3 a{color:inherit;text-decoration:none;transition:var(--transition)}
+.card h3 a:hover{color:var(--accent)}
+
+.card-desc{
+  font-size:0.9rem;color:var(--text-muted);line-height:1.65;
+  margin-bottom:0.8rem;
+}
+.card-meta{
+  font-size:0.78rem;color:var(--text-dim);
+  font-family:'Outfit',sans-serif;
+  display:flex;gap:1rem;flex-wrap:wrap;
+}
+
+/* ─── ACCORDION for long descriptions ─── */
+.accordion-toggle{
+  background:none;border:none;color:var(--accent);cursor:pointer;
+  font-size:0.82rem;font-family:'Outfit',sans-serif;font-weight:500;
+  padding:0.3rem 0;display:inline-flex;align-items:center;gap:0.3rem;
+  transition:var(--transition);
+}
+.accordion-toggle:hover{color:#6ee7b7}
+.accordion-toggle svg{transition:var(--transition);width:14px;height:14px}
+.accordion-toggle.open svg{transform:rotate(180deg)}
+.accordion-body{
+  max-height:0;overflow:hidden;transition:max-height 0.4s ease;
+}
+.accordion-body.open{max-height:2000px}
+.accordion-content{
+  padding-top:0.6rem;font-size:0.88rem;color:var(--text-muted);line-height:1.7;
+}
+.accordion-content strong{color:var(--text);font-weight:600}
+.accordion-content ul{margin:0.5rem 0 0.5rem 1.2rem}
+.accordion-content li{margin-bottom:0.35rem}
+
+/* ─── ABOUT SECTION ─── */
+.about-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.5rem;
+}
+.about-card{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:2rem;
+}
+.about-card h3{
+  font-family:'DM Serif Display',serif;font-size:1.2rem;
+  margin-bottom:0.8rem;color:var(--text);
+}
+.about-card p{color:var(--text-muted);font-size:0.92rem;line-height:1.7}
+
+/* ─── SEARCH ─── */
+.search-wrap{
+  max-width:520px;margin:0 auto 2.5rem;position:relative;
+}
+.search-wrap input{
+  width:100%;padding:0.85rem 1.2rem 0.85rem 3rem;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:999px;color:var(--text);font-size:0.95rem;
+  font-family:'Source Sans 3',sans-serif;
+  transition:var(--transition);outline:none;
+}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.search-wrap input::placeholder{color:var(--text-dim)}
+.search-wrap svg{
+  position:absolute;left:1rem;top:50%;transform:translateY(-50%);
+  color:var(--text-dim);width:18px;height:18px;
+}
+
+/* ─── STATS ─── */
+.stats-row{
+  display:flex;justify-content:center;gap:2.5rem;
+  margin-bottom:3rem;flex-wrap:wrap;
+}
+.stat{text-align:center}
+.stat-num{
+  font-family:'DM Serif Display',serif;font-size:2.2rem;
+  color:var(--accent);display:block;
+}
+.stat-label{font-size:0.82rem;color:var(--text-muted);font-family:'Outfit',sans-serif}
+
+/* ─── FOOTER ─── */
+footer{
+  border-top:1px solid var(--border);
+  padding:2.5rem 2rem;text-align:center;
+  color:var(--text-dim);font-size:0.82rem;
+  font-family:'Outfit',sans-serif;
+}
+footer a{color:var(--accent);text-decoration:none}
+footer a:hover{text-decoration:underline}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:768px){
+  .header-inner{flex-direction:column;height:auto;padding:1rem 0;gap:0.8rem}
+  nav{flex-wrap:wrap;justify-content:center}
+  .hero{padding:2.5rem 1rem 2rem}
+  main{padding:0 1rem 3rem}
+  .card-grid{grid-template-columns:1fr}
+  .about-grid{grid-template-columns:1fr}
+  .tab-bar{justify-content:center}
+  .stats-row{gap:1.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════ HEADER ════════ -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="#" class="logo" onclick="showTab('hem');return false">
+      <div class="logo-icon">Ψ</div>
+      Psykiatri <span>Kunskapsstöd</span>
+    </a>
+    <nav id="mainNav">
+      <a href="#" class="active" data-tab="hem">Hem</a>
+      <a href="#" data-tab="rattspsyk">Rättspsykiatri</a>
+      <a href="#" data-tab="psykos">Psykos & Diagnostik</a>
+      <a href="#" data-tab="farmakologi">Farmakologi</a>
+      <a href="#" data-tab="rehab">Rehabilitering</a>
+      <a href="#" data-tab="psykfilo">Psykologi & Filosofi</a>
+      <a href="#" data-tab="om">Om</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero" id="hero-section">
+  <div class="hero-badge"><span class="dot"></span> Uppdaterad mars 2026</div>
+  <h1>Kliniskt kunskapsstöd inom psykiatri och rättspsykiatri</h1>
+  <p>En kunskapsportal skapad av Said Fard, överläkare i vuxenpsykiatri och beroendemedicin, ST-läkare i rättspsykiatri vid VUP, Södra Älvsborgs sjukhus. Resurser för vårdpersonal, studenter, patienter och anhöriga.</p>
+  
+  <div class="search-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Sök bland alla resurser..." oninput="filterCards()">
+  </div>
+
+  <div class="stats-row">
+    <div class="stat"><span class="stat-num">30+</span><span class="stat-label">Textmaterial</span></div>
+    <div class="stat"><span class="stat-num">28</span><span class="stat-label">Podcast & video</span></div>
+    <div class="stat"><span class="stat-num">6</span><span class="stat-label">Temaområden</span></div>
+  </div>
+</section>
+
+<!-- ════════ MAIN ════════ -->
+<main>
+
+<!-- ──── TAB: HEM ──── -->
+<div class="tab-panel active" id="panel-hem">
+  <h2 class="section-title">Alla resurser</h2>
+  <p class="section-subtitle">Bläddra bland samtliga publicerade kunskapsstöd — text, podcast och video.</p>
+
+  <div class="tab-bar" id="homeFilter">
+    <button class="tab-btn active" onclick="filterType(this,'all')">Alla</button>
+    <button class="tab-btn" onclick="filterType(this,'text')">📄 Text</button>
+    <button class="tab-btn" onclick="filterType(this,'podcast')">🎧 Podcast</button>
+    <button class="tab-btn" onclick="filterType(this,'video')">🎬 Video</button>
+  </div>
+
+  <div class="card-grid" id="allCards">
+
+    <!-- ═══ TEXT MATERIAL ═══ -->
+
+    <div class="card" data-type="text" data-search="fast vårdkontakt fvk rut rättspsykiatri utslussning">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1EFxhmPYDQx5syxK0WrPv61TC7eD-j8KG/edit" target="_blank">Fast Vårdkontakt (FVK) i RUT</a></h3>
+      <p class="card-desc">Kunskapsstöd om den fasta vårdkontaktens roll i det rättspsykiatriska utslussningsteamet – arbetsuppgifter, relationsbygge och vardaglig rehabilitering.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="socionom kurator ölrv öppen rättspsykiatrisk vård socialt arbete">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1EzT57CCNfYCQsfNu_6Vnji0Wsv6dLAcm/edit" target="_blank">Socionom (Kurator) i ÖLRV</a></h3>
+      <p class="card-desc">Socionomens funktion i öppen rättspsykiatrisk vård – socialt stöd, boendefrågor, ekonomi och samverkan med kommun.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="chefsöverläkare ölrv öppen rättspsykiatrisk vård beslutsfattande juridik">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1-sp6hgZMquGn7GraE9uHd76kVYZyoQbC/edit" target="_blank">Chefsöverläkare i ÖLRV</a></h3>
+      <p class="card-desc">Chefsöverläkarens juridiska och kliniska ansvar i öppen rättspsykiatrisk vård – beslutsfattande, SUP, villkor och uppföljning.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="sjuksköterska ölrv öppen rättspsykiatrisk vård omvårdnad medicinering">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1D5Z6nh9MvSZy1CyuzxAX8a5MsebOBz98/edit" target="_blank">Sjuksköterska i ÖLRV</a></h3>
+      <p class="card-desc">Sjuksköterskans centrala roll i ÖLRV – medicinhantering, riskbedömning, prodromalsymtom och samverkan med teamet.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="arbetsterapeut ölrv öppen rättspsykiatrisk vård adl kognitiv belastning">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1eQzYz_4nTR1PFUxR-1tIdFCdmflLfJQF/edit" target="_blank">Arbetsterapeut i ÖLRV</a></h3>
+      <p class="card-desc">Arbetsterapeutens bedömning och insatser i ÖLRV – ADL, kognitiv belastning, aktivitetsbalans och funktionsåtervinning.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="metabolt syndrom antipsykotisk behandling sjuksköterska olanzapin klozapin viktuppgång">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1ifGgtgNckKGFzxFhJ7dHruFKcxSYmeAbSRjnJBnHSUA/edit" target="_blank">Metabolt syndrom och antipsykotisk behandling</a></h3>
+      <p class="card-desc">Guide för sjuksköterskor om den metabola risken vid antipsykotisk medicinering – kontrollschema, bukfetma, HbA1c och livsstilsinterventioner.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="mentalisering empati autism autismspektrum kognitiv affektiv">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1QuUc7bGGfoHRvJ6MxN41SHUq7mkP4auB/edit" target="_blank">Mentalisering och empati hos personer med autism</a></h3>
+      <p class="card-desc">Genomgång av kognitiv kontra affektiv empati vid autism och hur mentalisering kan tillämpas i den kliniska vardagen.</p>
+      <div class="card-meta"><span>Psykologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="rättspsykiatri sjuksköterskestudenter lrv lpt sup utbildning">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1ubBOscl_c-vOvnnzXGd1Ql_cg-NnyFIh/edit" target="_blank">Rättspsykiatri för sjuksköterskestudenter</a></h3>
+      <p class="card-desc">Utbildningsmaterial om LRV, LPT, SUP och den rättspsykiatriska vårdkedjan – anpassat för studenter i verksamhetsförlagd utbildning.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="boendestöd hemtjänst socialtjänst skillnad pedagogisk rehabilitering">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1F8F0Mo0AorXwXsa_OrnYqa_4Rjt15hHrpuV0H4BcHZE/edit" target="_blank">Boendestöd kontra Hemtjänst</a></h3>
+      <p class="card-desc">Pedagogisk analys av skillnaderna mellan boendestöd (tränande insats) och hemtjänst (kompenserande insats) inom välfärden.</p>
+      <div class="card-meta"><span>Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="hemsjukvård medicindelning delegering iordningställande överlämnande administrering">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1_74vuLqksKqVbb5j1X1NP7c-V_9RFgEs/edit" target="_blank">Hemsjukvård medicindelning</a></h3>
+      <p class="card-desc">Juridiska och praktiska aspekter av läkemedelshantering i hemsjukvården – delegering, ansvar och säkerhetsrutiner.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="temperament irritabelt eips emotionellt instabil personlighetsstörning borderline">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1gHVh-gvct4RJ29OL90A60qo3yUtXjKys/edit" target="_blank">Temperament och EIPS</a></h3>
+      <p class="card-desc">Sambandet mellan irritabelt temperament och emotionellt instabil personlighetsstörning – kliniska och teoretiska perspektiv.</p>
+      <div class="card-meta"><span>Psykologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="boendestöd rättspsykiatri socialtjänst rehabilitering">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1rZ67JRD2inci1oa623FwSbZ56fJ8_U2v4kkFYusAdts/edit" target="_blank">Boendestöd – kunskapsstöd</a></h3>
+      <p class="card-desc">Övergripande kunskapsstöd om boendestöd som insats – lagstiftning, bedömning och praktisk tillämpning.</p>
+      <div class="card-meta"><span>Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="ängslig undvikande personlighetssyndrom rättspsykiatri öppenvård">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/19MEgqAN3I8gjCLbQAbY_G9o82Lp3K6nRapOIQgcu5sk/edit" target="_blank">Ängslig (undvikande) personlighetssyndrom i rättspsykiatrisk öppenvård</a></h3>
+      <p class="card-desc">Kliniska utmaningar med undvikande personlighet i ÖLRV – diagnostik, vårdallians och anpassade bemötandestrategier.</p>
+      <div class="card-meta"><span>Psykologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="klozapin serumkoncentration provtagning dalvärde cyp1a2 patientinformation">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1eukL2mIrvuQXHCAiXMJNy4yvUmfsbEvB/edit" target="_blank">Klozapin: Serumkoncentration, provtagning och patientinformation</a></h3>
+      <p class="card-desc">Detaljerad guide om dalvärde, CYP1A2-interaktioner, rökningens påverkan och säker klinisk uppföljning av klozapin.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="lamotrigin psykiatri bipolär stämningsstabiliserande tdm terapeutisk monitorering">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1md6Vwyf-7XkuzDa_OMwA2l3F5NXAscqje3IaPUq-sgI/edit" target="_blank">S-lamotrigin inom psykiatri</a></h3>
+      <p class="card-desc">Vetenskaplig analys av terapeutisk läkemedelsmonitorering av lamotrigin – farmakokinetik, bipolär sjukdom och klinisk dosering.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="esl ett självständigt liv fvk rut rehabilitering psykoedukation">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1DgvFyyYLccaOK2oJkrmJwOwDPkx2lA799Y9IcwQAMTc/edit" target="_blank">ESL: FVK:s roll i RUT-teamet efter ESL-kurs</a></h3>
+      <p class="card-desc">Handledning för fast vårdkontakt om hur ESL-insatser omsätts i vardagen – mikrosteg, scaffolding och återfallsprevention.</p>
+      <div class="card-meta"><span>Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="boendestöd klinisk organisatorisk mekanismer borås vgr samverkan region kommun">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1EdvbHni3kRaNXqXC53EsssBUIhQUT2FCBTgHOJPmBso/edit" target="_blank">Boendestödets kliniska och organisatoriska mekanismer</a></h3>
+      <p class="card-desc">Analys av samverkan mellan Borås Stad och Västra Götalandsregionen – hur boendestöd fungerar som brottsförebyggande insats i rättspsykiatrin.</p>
+      <div class="card-meta"><span>Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <!-- NEW TEXT (from Text folder, mars 2026) -->
+
+    <div class="card" data-type="text" data-search="dup duration untreated psychosis första psykos prodromal tidig intervention">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1HiidN5-4Ye0OzuW8skSWghKc8wNAsGBvbQoUP7bKZVk/edit" target="_blank">Varför varje vecka räknas: 5 insikter om tiden före den första psykosen</a></h3>
+      <p class="card-desc">Om DUP (Duration of Untreated Psychosis) och varför tidig intervention är avgörande – den dolda kostnaden av väntan och det kritiska prognostiska fönstret.</p>
+      <div class="card-meta"><span>Psykos & Diagnostik</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="kultur psykos hallucinationer vanföreställningar förklaringsmodell transkulturell">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1FLBoMhp-m-JCuh0SgDY1NibB40FbN2uHbOEhsOZarI0/edit" target="_blank">Verkligheten är kulturell: 5 insikter om hur vår bakgrund formar psykos</a></h3>
+      <p class="card-desc">Kulturens roll i upplevelsen av psykos – hur hallucinationer, vanföreställningar och hjälpsökande beteende varierar globalt.</p>
+      <div class="card-meta"><span>Psykos & Diagnostik</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="informellt tvång autonomi samtycke maktbalans psykiatri etik">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1gaBUX6WCucmNLjWScs1xW70N9WBp5OYQOWgPK0BXXQE/edit" target="_blank">Informellt tvång – Vad menas?</a></h3>
+      <p class="card-desc">Begreppet informellt tvång i psykiatrin – subtila påtryckningar, villkorad behandling och den etiska gränsdragningen kring autonomi och samtycke.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="reagila kariprazin patientinformation negativa symtom schizofreni">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1mfGHBGLkT9MLhuUl1CwO8y9Qnbwrmt8fiz3J5WRdcQM/edit" target="_blank">Patientinformation – Reagila (kariprazin)</a></h3>
+      <p class="card-desc">Lättförstådd patientinformation om Reagila som tillägg vid schizofreni – negativa symtom, biverkningar och vad man kan förvänta sig.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="psykoedukation fvk rut varningstecken återfall behandlingsföljsamhet">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1Ei4HW902C-GfEk-UZO1GFQ7riQPD_zTqHR0Q0IhgfEc/edit" target="_blank">Psykoedukation för FVK inom RUT</a></h3>
+      <p class="card-desc">Centrala psykoedukativa områden för fast vårdkontakt – varningstecken vid psykos, bipolär sjukdom och hur man stärker patientens egenkontroll.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="negativa symtom depression passivitet psykosförsämring differentialdiagnostik fvk">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1EZhHOa_I6CMYFF-uzu0gXMO_AWAk86U33BdoMbu5wXg/edit" target="_blank">FVK: Negativa symtom eller depression?</a></h3>
+      <p class="card-desc">Kliniskt stöd för att skilja negativa symtom vid psykos från depression, passivitet och psykosförsämring – observationspunkter för FVK.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="varningssignaler negativa symtom försämring fvk rut tidiga tecken">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1E0E-saFAyC5kcSaPZEttJnciBI_I59-aP4F63ZHcHiQ/edit" target="_blank">FVK: Varningssignaler vid försämring av negativa symtom</a></h3>
+      <p class="card-desc">Komplement till ESL – hur FVK upptäcker tidiga tecken på smygande försämring av negativa symtom och agerar preventivt.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="riskbedömning våldsbrott hcr-20 fvk rut dynamisk risk">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1DwgePRWIhomqmjH7Ye3oME7hU1B2S4spEiZZJERzK3o/edit" target="_blank">FVK och riskbedömning av våldsbrott</a></h3>
+      <p class="card-desc">Kontinuerlig riskbedömning i ÖLRV – HCR-20, dynamiska faktorer, observation och hur FVK bidrar till riskreduktion i vardagen.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="skyddade faktorer saprof rättspsykiatri resiliens skyddsfaktorer fvk">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/1DuBc5C0NqumgI5fyymejKv9f-0xF-o_6RYu90blPY6M/edit" target="_blank">FVK och skyddande faktorer</a></h3>
+      <p class="card-desc">Genomgång av skyddande faktorer i rättspsykiatrisk öppenvård – SAPROF, resursbaserade insatser och hur FVK bygger stabilitet.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <div class="card" data-type="text" data-search="paranoid personlighetsstörning misstänksamhet fvk rut behandlingsallians">
+      <div class="card-type text">📄 Text</div>
+      <h3><a href="https://docs.google.com/document/d/13za1xgUkYfILzHcY2OMOlqHdlgYq8gCnUv85LgFwKis/edit" target="_blank">Paranoid personlighetsstörning för FVK</a></h3>
+      <p class="card-desc">Kliniska implikationer av paranoid personlighet i RUT – misstänksamhet, alliansskapande och strategier för en fungerande kontakt.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad mars 2026</span></div>
+    </div>
+
+    <!-- ═══ PODCAST / VIDEO ═══ -->
+
+    <div class="card" data-type="podcast" data-search="reagila kariprazin schizofreni dopamin d3 akatisi halveringstid anhöriga">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1ZcZJIJRze6vHh-u_Q059HyFGKU-RvXVp/view" target="_blank">Är det sjukdomen eller medicinen? – Reagila</a></h3>
+      <p class="card-desc">Riktar sig till anhöriga. Reagila fungerar som en "smart termostat" i hjärnan – den bromsar psykosens överaktivitet men stimulerar motivation via D3-receptorer. Varnar för akatisi som misstolkas som ångest, och den extrema halveringstiden som ger en biologisk buffert.</p>
+      <button class="accordion-toggle" onclick="toggleAccordion(this)">Läs mer <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="accordion-body"><div class="accordion-content">
+        <ul>
+          <li><strong>"Smart termostat":</strong> Bromsar överaktivitet i hjärnans djupa delar men ger mild stimulans i pannloben för motivation och livsglädje.</li>
+          <li><strong>D3-receptorer och belöning:</strong> Angriper oförmågan att känna glädje; "snäll" mot ämnesomsättningen utan extrem viktuppgång.</li>
+          <li><strong>Akatisi-varningen:</strong> Intensiv fysisk rastlöshet misstolkas ofta som förvärrad psykos – om dosen höjs kastas "bensin på elden".</li>
+          <li><strong>Extremt lång halveringstid:</strong> Huvudmetabolit stannar 1–3 veckor – en glömd helgdos ger ingen krasch. Anhöriga har tid att agera.</li>
+        </ul>
+      </div></div>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="antipsykotika prolaktin bröstmjölk hyperprolaktinemi aripiprazol bromokriptin">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1sCInegDEBa_EjLFZhVOJZwi5qpaeEkEY/view" target="_blank">När psykosmedicin räddar förståndet men ger bröstmjölk</a></h3>
+      <p class="card-desc">Moment 22: antipsykotika blockerar dopamin och häver psykosen, men släpper bromsen på prolaktin. Tre behandlingsstrategier: aripiprazol som "dimmer", bromokriptin via det anatomiska kryphålet, och metformin/örter.</p>
+      <button class="accordion-toggle" onclick="toggleAccordion(this)">Läs mer <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="accordion-body"><div class="accordion-content">
+        <ul>
+          <li><strong>Mekanismen:</strong> Dopaminblockad → hyperprolaktinemi → bröstmjölk (även hos män), utebliven mens, benskörhet.</li>
+          <li><strong>Strategi 1 – Aripiprazol:</strong> Fungerar som "dimmer" i hypofysen. Ger precis tillräcklig dopaminsignalering utan att trigga psykos.</li>
+          <li><strong>Strategi 2 – Bromokriptin:</strong> Extremt låga doser verkar utanför blod-hjärnbarriären – stoppar mjölk utan att nå hjärnan.</li>
+          <li><strong>Strategi 3 – Metformin/örter:</strong> Sänker prolaktin via metabol korrigering. Pion och lakritsrot ger en mjuk knuff.</li>
+        </ul>
+      </div></div>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="kultur psykos hallucinationer röster västafrika asien socialt kindling kbt">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1ZIsRUq8yvKnKwgDphUn2lSBN2DJHfSel/view" target="_blank">Kulturen formar rösterna i ditt huvud</a></h3>
+      <p class="card-desc">Utifrån en studie från Kings College London (2023): i USA är röster fientliga, i Västafrika stöttande. Samhällets rädslor blir vanföreställningar ("socialt kindling"). Tre förklaringsmodeller och kulturellt anpassad KBT.</p>
+      <button class="accordion-toggle" onclick="toggleAccordion(this)">Läs mer <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="accordion-body"><div class="accordion-content">
+        <ul>
+          <li><strong>Kulturbestämd karaktär:</strong> USA → fientliga röster. Ghana → rådgivande, andliga röster.</li>
+          <li><strong>Socialt kindling:</strong> Storbritanniens kameradebatt → vanföreställningar om teknologisk övervakning.</li>
+          <li><strong>Tre modeller:</strong> Förhäxning (Afrika), religiös-andlig (Asien/Latinamerika), biopsykosocial (västvärlden).</li>
+          <li><strong>Kulturkrock:</strong> Avfärdande av andliga upplevelser → patienter söker helare → förlängd obehandlad psykos.</li>
+        </ul>
+      </div></div>
+      <div class="card-meta"><span>Psykos & Diagnostik</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="negativa symtom glasfönster reagila kariprazin akatisi självskattning">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1jcveHsQ4u8BSsznhYS6AXiPLcKPBYthS/view" target="_blank">Att krossa psykosens osynliga glasfönster</a></h3>
+      <p class="card-desc">Patientinformation om Reagila vid negativa symtom. 6–8 veckors effektfördröjning, akatisi som "motor på tomgång" och vikten av rätt ord. Självskattning som livslina under den långa insättningsperioden.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="ontologi filosofi depression diagnos dsm naturliga sorter perspektivism">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1nbgNglpRA5EyjQJcwqiyMzWSoZhXmsPs/view" target="_blank">Varför benbrott känns verkligare än depression</a></h3>
+      <p class="card-desc">En filosofisk djupdykning i ontologi: varför psykiatriska diagnoser saknar "naturliga sorter", Aristoteles "clamping" i databaser, och perspektivism som väg framåt. DSM som tillfälligt arbetsdokument, inte huggen sten.</p>
+      <div class="card-meta"><span>Filosofi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="video" data-search="brott vård rättspsykiatri statistik brå säkerhet narkotika hot">
+      <div class="card-type video">🎬 Video</div>
+      <h3><a href="https://drive.google.com/file/d/1fBNNQ4M5VdmDeYymOijACNT5Prm5T6qm/view" target="_blank">Brott och Vård – Rättspsykiatri</a></h3>
+      <p class="card-desc">Brå-statistik: 34 % noterade incidenter men bara 13 % domfällda. Vanligaste brotten: ringa narkotika och hot mot tjänsteman. Skärpta säkerhetsregler efter 2013–2014 gav tydlig nedgång i brottsligheten.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="adhd metylfenidat ritalin elvanse farmakologi frukost apelsinjuice ion trapping farmakogenetik">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1wcIUkv9z8xpKZlg1S6T_YbEExJMQkO_H/view" target="_blank">Därför fungerar din ADHD-medicin inte alltid</a></h3>
+      <p class="card-desc">Metylfenidat som "propp i handfatet", amfetaminer som "inbrytare". Frukosten avgör – apelsinjuice gör att amfetamin kissas ut (ion trapping). Elvanse: den olåsbara prodrogen. Framtidens farmakogenetik ersätter trial and error.</p>
+      <button class="accordion-toggle" onclick="toggleAccordion(this)">Läs mer <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="accordion-body"><div class="accordion-content">
+        <ul>
+          <li><strong>Metylfenidat vs amfetamin:</strong> Propp vs inbrytare – helt olika mekanismer på dopamin/noradrenalin.</li>
+          <li><strong>Frukostens kraft:</strong> "Dose dumping" på fastande mage. C-vitamin → ion trapping → medicinen urineras ut.</li>
+          <li><strong>Elvanse (lisdexamfetamin):</strong> En "låst portfölj" – inaktiv tills enzymer klipper upp den. Omöjlig att missbruka via snortning.</li>
+          <li><strong>Missbruksparadoxen:</strong> Centralstimulantia vid aktivt missbruk stiller dopaminsuget.</li>
+          <li><strong>Framtid:</strong> CYP2D6-test för skräddarsydd dos från dag ett.</li>
+        </ul>
+      </div></div>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="dsm-5 psykosdiagnos schizofreni schizofreniform schizoaffektiv vanföreställningssyndrom anosognosi">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/17cxz1Ot2HJwj3FkHjw_Ofb_P7VSNO4x-/view" target="_blank">Sätt rätt psykosdiagnos enligt DSM-5</a></h3>
+      <p class="card-desc">Klinisk lathund: fem domäner, A-kriteriet och kalender som verktyg. Under 1 mån = kortvarig psykos, 1–6 mån = schizofreniformt, över 6 mån = schizofreni. Tvåveckorsfönstret för schizoaffektivt syndrom. Anosognosi som neurologiskt symtom.</p>
+      <button class="accordion-toggle" onclick="toggleAccordion(this)">Läs mer <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="accordion-body"><div class="accordion-content">
+        <ul>
+          <li><strong>A-kriteriet:</strong> Minst ett av tre: vanföreställningar, hallucinationer eller desorganiserat tal. Katatoni ensamt räcker inte.</li>
+          <li><strong>Tid som diagnostisk nyckel:</strong> &lt;1 mån → kortvarig psykos; 1–6 mån → schizofreniformt; &gt;6 mån → schizofreni.</li>
+          <li><strong>Schizoaffektivt:</strong> Kräver ≥2 veckor psykos utan stämningssymtom.</li>
+          <li><strong>Anosognosi:</strong> Bristande insikt är en "blind fläck" i hjärnan, inte logisk förnekelse.</li>
+        </ul>
+      </div></div>
+      <div class="card-meta"><span>Psykos & Diagnostik</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="fenomenologi intentionalitet sokolowski kub medvetande perception">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1N2P-qTEgS6AZ3VgGy9M6Vc_UZr3oytkS/view" target="_blank">Du är inte instängd i din hjärna</a></h3>
+      <p class="card-desc">Fenomenologi utifrån Sokolowski: intentionalitet krossar den "mentala bubblan". Kub-experimentet och medintenderande. Frånvarons aktiva roll – och frågan om platta skärmar berövar oss djupperception.</p>
+      <div class="card-meta"><span>Filosofi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="video" data-search="klozapin feber neutropeni förgiftning sjuksköterska checklista akut">
+      <div class="card-type video">🎬 Video</div>
+      <h3><a href="https://drive.google.com/file/d/19NvVzWO8o_uxTyXKXZpyxOOLXOH1deyt/view" target="_blank">Klozapin och feber</a></h3>
+      <p class="card-desc">Handlingsplan för sjuksköterskor: feber hos klosapinpatient = dubbelt hot (neutropeni + förgiftning). Trestegsraket, ANC/CRP samma dag, rökstoppets "farmakologiska tickande bomb". Tre kritiska telefonfrågor.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="klozapin balansgång dalvärde hcr-20 ölrv mentalisering agranulocytos myokardit">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1zIptDjmjXYhLYUMe6tPWc3wuHnL6XWOY/view" target="_blank">Sjuksköterskans balansgång mellan psykos och klozapinförgiftning</a></h3>
+      <p class="card-desc">Klozapins snäva terapeutiska fönster i ÖLRV. Dalvärde, CYP1A2-hämning vid rökstopp/infektion, HCR-20:s C-faktorer och mentalisering mot stigma. Sjuksköterskor som samhällets yttersta skyddsnät.</p>
+      <div class="card-meta"><span>Rättspsykiatri · Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="riskbedömning våld hcr-20 saprof ölrv hembesök varningssignaler mentalisering">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1AL5lzab1I72v2JJJKLyjgiaE4Hex89QC/view" target="_blank">Så bedöms risken för våld i trapphuset</a></h3>
+      <p class="card-desc">Sjuksköterskestudenter vid SÄS: HCR-20 som vågskål, skyddsfaktorer som "heliumballonger". Våldets "trappsteg" och praktikfallet "Johan". Faran med vårdpersonalens egna rädslor – mentalisering som motgift.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="rut utslussning fvk esl scaffolding rehabilitering självständighet frihet">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1KwjcFAWydnYrUb_w9E-tsP4ljMt9DErw/view" target="_blank">Från rättspsykiatrisk kontroll till ett självständigt liv</a></h3>
+      <p class="card-desc">FVK:s roll i RUT: rehabilitering som frihetsbiljett. Scaffolding – ett yttre skelett tills exekutiva förmågor stabiliseras. Att våga be om hjälp = yttersta beviset på självständighet.</p>
+      <div class="card-meta"><span>Rättspsykiatri · Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="ssri antidepressiva insättning utsättning nedtrappning brain zaps hyperbolisk kurva">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/13rzKk_wf5qK2E4DeZgZJ88FBCISSrMSn/view" target="_blank">Börja och sluta med antidepressiva rätt</a></h3>
+      <p class="card-desc">Svenska riktlinjer 2024: "start low, go slow", glaskupefenomenet och serotoninreceptorer i magen. Utsättningsbesvär (brain zaps) vs verkligt återfall. Den hyperboliska kurvan och varför sista steget kräver månaders inbromsning.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="boendestöd våldsbrott brottsförebyggande röda flaggor esl kognitiv rehabilitering">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1Xmd7hahPzOTG7LRDJyvUi-mj7mU-U0_1/view" target="_blank">Boendestöd som skydd mot nya våldsbrott</a></h3>
+      <p class="card-desc">Boendestödjaren som "personlig tränare för hjärnan": pedagogisk rehabilitering, röda flaggor (oöppnad post, bristande hygien), och varför det verkliga samhällsskyddet ligger i att klara en grå vardag.</p>
+      <div class="card-meta"><span>Rehabilitering · Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="rut team balans samhällsskydd frihet tvärprofessionellt exoskelett mentalskötare seismograf">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1pC1RO2Cc6HLikb-VIFMwFKCDDQuN7z34/view" target="_blank">RUT-teamets balansakt mellan samhällsskydd och frihet</a></h3>
+      <p class="card-desc">Teamet som organisk maskin: socionom bygger fundament, sjuksköterska som medicinsk detektiv, mentalskötare som "seismografer i fält". Slutenvårdens "exoskelett" skruvas av – patientens inre kompass måste ta vid.</p>
+      <div class="card-meta"><span>Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="boendestöd vardagshjälp samhällsskydd hcr-20 sip borås kunskapsstöd">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1_kVTP1MDSFqYxdz61un-q5SLWPM5i0mg/view" target="_blank">Boendestöd som vardagshjälp och samhällsskydd</a></h3>
+      <p class="card-desc">Internt kunskapsstöd: strukturerad hjälp till självhjälp. Strikta lagkrav men brist på evidens. Detaljerade funktionsbedömningar. HCR-20-koppling – boendestöd som aktiv sekundär prevention mot våldsbrott.</p>
+      <div class="card-meta"><span>Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="klozapin livsstil rökning kaffe cyp1a2 infektion farmakologisk storm toxicitet">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1o4lw8cmXKLOMt-KVTdkVvIYeyiHT5-RV/view" target="_blank">Klozapin och livsstilens dolda risker</a></h3>
+      <p class="card-desc">CYP1A2 och klozapin: rökstopp → toxiska nivåer. Minskat kaffe → ytterligare stigning. Infektion + ciprofloxacin = "perfekt storm". Dalvärde-provtagningens strikta rutin. Agranulocytos och myokardit som "radarsystem".</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="esl ett självständigt liv manual kbt mikrosteg scaffolding empowerment">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/17-E3Px9VkdEjy-qXQmNsKrl79e3YsJc0/view" target="_blank">En bruksanvisning för ett självständigt liv</a></h3>
+      <p class="card-desc">ESL-manualen steg för steg: tre pelare (KBT, social färdighetsträning, psykoedukation). Mikrosteg för att runda ångest – "lägg bara fram en handduk". En levande byggnadsställning, inte en stelbent checklista.</p>
+      <div class="card-meta"><span>Rehabilitering</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="video" data-search="psykiatrins filosofi 4e kognition naturalism normativism förklaringspluralism">
+      <div class="card-type video">🎬 Video</div>
+      <h3><a href="https://drive.google.com/file/d/1u2H9SAM6beiaMN-KOOFKH1ZtSAoVDHOx/view" target="_blank">Philosophy of Psychiatry – Key Recent Advances</a></h3>
+      <p class="card-desc">Naturalism vs normativism: tusenskönan som blomma eller ogräs. Förklaringspluralism – flera kartor för samma landskap. 4E-kognition: sinnet är förkroppsligat, inbäddat, aktivt och utvidgat. Mot en integrerad psykiatri.</p>
+      <div class="card-meta"><span>Filosofi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="behandlingsresistent psykos akatisi postpsykotisk depression klozapin missbruk terapi">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1VLW-Lq5IFRscYyKpIaB6RpUYMGSYXMre/view" target="_blank">Varför vissa psykoser inte går att nå</a></h3>
+      <p class="card-desc">Artificiell behandlingsresistens: systemets otålighet, feldiagnostiserade "tysta" psykotiska depressioner. Pillret som inkräktare vid upplösta jaggränser. "Awakenings"-paradoxen: att vakna upp till ett förlorat liv. Varning för psykoanalys vid psykos.</p>
+      <div class="card-meta"><span>Psykos & Diagnostik</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="vanföreställningar dopamin aberrant salience jumping conclusions kbt metakognitiv">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1_vCcCHQQaYalLzZwcyD57g31s7jHjbic/view" target="_blank">Vanföreställningar: Dopamin, bisarra tankar och hjärnan</a></h3>
+      <p class="card-desc">Psykopatologi: från diagnosboxar till dimensionellt spektrum. "Aberrant salience" – dopamin fäster extrem vikt vid neutrala händelser. Kognitiva fällor: "jumping to conclusions" och bekräftelsefilter. KBT och metakognitiv träning.</p>
+      <div class="card-meta"><span>Psykos & Diagnostik</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="autism permission anhöriga kognitiv affektiv empati binära val stimming tyngdtäcke">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/171-Iqwk5UdcxCc-wxKmaVVF_cTq8ckwo/view" target="_blank">Stötta din son under permissionen</a></h3>
+      <p class="card-desc">För föräldrar: radiometaforen – kognitiv empati svajar men affektiv empati är på max. Binära val istället för "hur mår du?". Stimming = reglering, inte avvikelse. "Datormetaforen" – fler frågor = fler klick på en fryst skärm.</p>
+      <div class="card-meta"><span>Rättspsykiatri · Psykologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="medicindelning piller samhällsskydd ölrv delegering cheeking sup juridik">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1eIIg9aCw7CxNhK_1zgmcmKAT1gCgy_xj/view" target="_blank">När ett piller skyddar hela samhället</a></h3>
+      <p class="card-desc">Juridikens tre steg: iordningställande, överlämnande, administrering. Delegeringsdilemmat som säkerhetens svagaste länk. "Snubbeltråden" – missad dos i ÖLRV triggar larm. Cheeking och framtidens läkemedelsautomater.</p>
+      <div class="card-meta"><span>Farmakologi · Rättspsykiatri</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="metabolt syndrom antipsykotika viktuppgång bukfetma insulin sjuksköterska hba1c">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1FjKdYJQ_6UCgVKV-nRzzBi_8-JszP7u-/view" target="_blank">Rädda hjärnan utan att offra kroppen</a></h3>
+      <p class="card-desc">Metabolt syndrom vid antipsykotisk behandling: tre mekanismer (mättnadssignal, trötthet, insulinstörning). Biologi, inte bristande karaktär. Sjuksköterskan som metabol detektiv. Empatiskt motiverande samtal utan skuld.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="empati hjärna neurovetenskap delade nätverk skadeglädje medkänsla personal distress">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1ZVI__PYt29TNNhoTJNSgyTrSApWUTWuu/view" target="_blank">Empatins komplexa hjärna</a></h3>
+      <p class="card-desc">De Vignemont & Singer: fyra krav för äkta empati. Delade nätverk (ACC, insula) – vi "ekar" andras smärta. Skadeglädje: mäns empati stängs av mot oschyssta. Personlig stress vs medkänsla – empati leder inte automatiskt till handling.</p>
+      <div class="card-meta"><span>Psykologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="podcast" data-search="klozapin riktlinjer svenska provtagning dalvärde cyp1a2 rökning feber">
+      <div class="card-type podcast">🎧 Podcast</div>
+      <h3><a href="https://drive.google.com/file/d/1Y0Em3bVtkWvdlWzWarFS4LyK159EV1z8/view" target="_blank">Nya svenska riktlinjer för säkrare klozapinbehandling</a></h3>
+      <p class="card-desc">Klozapin och vardagsförändringar: dalvärde-rutin, rökstopp och kaffeintag som CYP1A2-hämmare. Infektionens perfekta storm. Agranulocytos och myokardit – kontroller som radarsystem, inte skräckpropaganda.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+    <div class="card" data-type="video" data-search="litium bipolär sjukdom suicid tredjedelsregeln förgiftning njurfunktion sjuksköterska">
+      <div class="card-type video">🎬 Video</div>
+      <h3><a href="https://drive.google.com/file/d/1g-rogOcrionGk6AYQt767OpcskvxdhbW/view" target="_blank">Litiumbehandling</a></h3>
+      <p class="card-desc">Sjuksköterskeutbildning: litium minskar suicid med 87 %. Tredjedelsregeln, 12-timmarsprovet, extremt smalt terapeutiskt fönster. Förgiftning triggas av vätskeförlust/Ipren, inte överdos. Livslång uppföljning av njurar och sköldkörtel.</p>
+      <div class="card-meta"><span>Farmakologi</span><span>Publicerad jan 2026</span></div>
+    </div>
+
+  </div><!-- /card-grid -->
+</div><!-- /panel-hem -->
+
+<!-- ──── TAB: RÄTTSPSYKIATRI ──── -->
+<div class="tab-panel" id="panel-rattspsyk">
+  <h2 class="section-title">Rättspsykiatri & ÖLRV</h2>
+  <p class="section-subtitle">LRV, öppen rättspsykiatrisk vård, RUT-teamet, riskbedömning och samhällsskydd.</p>
+  <div class="card-grid" id="rattsCards"></div>
+</div>
+
+<!-- ──── TAB: PSYKOS ──── -->
+<div class="tab-panel" id="panel-psykos">
+  <h2 class="section-title">Psykos & Diagnostik</h2>
+  <p class="section-subtitle">Psykossjukdomar, DSM-5, DUP, kultur och diagnostiska verktyg.</p>
+  <div class="card-grid" id="psykosCards"></div>
+</div>
+
+<!-- ──── TAB: FARMAKOLOGI ──── -->
+<div class="tab-panel" id="panel-farmakologi">
+  <h2 class="section-title">Farmakologi</h2>
+  <p class="section-subtitle">Klozapin, litium, SSRI, ADHD-medicin, metabola risker och behandlingsstrategier.</p>
+  <div class="card-grid" id="farmaCards"></div>
+</div>
+
+<!-- ──── TAB: REHABILITERING ──── -->
+<div class="tab-panel" id="panel-rehab">
+  <h2 class="section-title">Rehabilitering & Boendestöd</h2>
+  <p class="section-subtitle">ESL, boendestöd, hemsjukvård, utslussning och vardagsrehabilitering.</p>
+  <div class="card-grid" id="rehabCards"></div>
+</div>
+
+<!-- ──── TAB: PSYKOLOGI & FILOSOFI ──── -->
+<div class="tab-panel" id="panel-psykfilo">
+  <h2 class="section-title">Psykologi & Filosofi</h2>
+  <p class="section-subtitle">Empati, mentalisering, fenomenologi, ontologi och psykiatrins filosofi.</p>
+  <div class="card-grid" id="psykfiloCards"></div>
+</div>
+
+<!-- ──── TAB: OM ──── -->
+<div class="tab-panel" id="panel-om">
+  <h2 class="section-title">Om Psykiatri Kunskapsstöd</h2>
+  <p class="section-subtitle">Bakgrund, syfte och kontaktinformation.</p>
+
+  <div class="about-grid">
+    <div class="about-card">
+      <h3>Vem står bakom?</h3>
+      <p>Denna kunskapsportal är skapad och underhålls av <strong>Said Fard</strong>, överläkare i vuxenpsykiatri och beroendemedicin samt ST-läkare i rättspsykiatri vid Vuxenpsykiatriska kliniken (VUP), Södra Älvsborgs sjukhus (SÄS) i Borås.</p>
+      <p style="margin-top:0.8rem">Innehållet representerar inte officiella ställningstaganden från VUP eller SÄS, utan är ett personligt initiativ för att samla kliniskt relevanta kunskapsresurser.</p>
+    </div>
+    <div class="about-card">
+      <h3>Syfte</h3>
+      <p>Portalen syftar till att göra klinisk kunskap inom psykiatri och rättspsykiatri lättillgänglig för:</p>
+      <p style="margin-top:0.6rem">• <strong>Vårdpersonal</strong> – läkare, sjuksköterskor, kuratorer, arbetsterapeuter, boendestödjare och mentalskötare<br>
+      • <strong>Studenter</strong> – i verksamhetsförlagd utbildning och på kliniska rotationer<br>
+      • <strong>Patienter och anhöriga</strong> – psykoedukation som stärker delaktighet i vården</p>
+    </div>
+    <div class="about-card">
+      <h3>Materialets karaktär</h3>
+      <p>Resurserna omfattar skriftliga kunskapsstöd, poddar och videoföreläsningar. De täcker allt från farmakologi och diagnostik till rehabilitering, riskbedömning och filosofiska perspektiv på psykiatrin. Allt material är framtaget med en ambition att vara kliniskt korrekt men pedagogiskt tillgängligt.</p>
+    </div>
+    <div class="about-card">
+      <h3>Kontakt</h3>
+      <p>Har du frågor, förslag på nytt material eller vill rapportera felaktigheter? Kontakta:</p>
+      <p style="margin-top:0.8rem;font-size:1.05rem"><a href="mailto:saidfardpsychiatry@gmail.com" style="color:var(--accent);text-decoration:none;font-weight:600">saidfardpsychiatry@gmail.com</a></p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <p>© 2026 Said Fard · Psykiatri Kunskapsstöd · <a href="mailto:saidfardpsychiatry@gmail.com">saidfardpsychiatry@gmail.com</a></p>
+  <p style="margin-top:0.4rem">Innehållet representerar inte officiella ställningstaganden från VUP eller SÄS.</p>
+</footer>
+
+<script>
+// ─── TAB SWITCHING ───
+const navLinks = document.querySelectorAll('#mainNav a');
+const panels = document.querySelectorAll('.tab-panel');
+
+function showTab(tabId) {
+  panels.forEach(p => p.classList.remove('active'));
+  navLinks.forEach(a => a.classList.remove('active'));
+  const panel = document.getElementById('panel-' + tabId);
+  if (panel) panel.classList.add('active');
+  const link = document.querySelector(`#mainNav a[data-tab="${tabId}"]`);
+  if (link) link.classList.add('active');
+  
+  // Populate category panels on first visit
+  if (tabId !== 'hem' && tabId !== 'om') populateCategory(tabId);
+  
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+navLinks.forEach(link => {
+  link.addEventListener('click', e => {
+    e.preventDefault();
+    showTab(link.dataset.tab);
+  });
+});
+
+// ─── CATEGORY MAPPING ───
+const categoryMap = {
+  rattspsyk: ['fast vårdkontakt','socionom','chefsöverläkare','sjuksköterska i ölrv','arbetsterapeut','rättspsykiatri för','informellt tvång','psykoedukation för fvk','negativa symtom eller depression','varningssignaler','riskbedömning','skyddade faktorer','paranoid personlighets','brott och vård','risken för våld','rut-team','rättspsykiatrisk kontroll','son under permission','piller skyddar','balansgång mellan psykos'],
+  psykos: ['varje vecka räknas','verkligheten är kulturell','kulturen formar','psykosdiagnos','glasfönster','psykoser inte går','vanföreställningar'],
+  farmakologi: ['metabolt syndrom','klozapin','lamotrigin','reagila','hemsjukvård medicin','bröstmjölk','feber','livsstilens dolda','adhd-medicin','antidepressiva','hjärnan utan att offra','klozapinbehandling','litiumbehandling'],
+  rehab: ['boendestöd','hemtjänst','esl','bruksanvisning','självständigt liv'],
+  psykfilo: ['mentalisering','temperament','ängslig','empati','instängd i din hjärna','benbrott','philosophy of psychiatry']
+};
+
+function populateCategory(tabId) {
+  const container = document.getElementById(tabId === 'rattspsyk' ? 'rattsCards' :
+    tabId === 'psykos' ? 'psykosCards' :
+    tabId === 'farmakologi' ? 'farmaCards' :
+    tabId === 'rehab' ? 'rehabCards' : 'psykfiloCards');
+  
+  if (container.children.length > 0) return; // already populated
+  
+  const allCards = document.querySelectorAll('#allCards .card');
+  const keywords = categoryMap[tabId] || [];
+  
+  allCards.forEach(card => {
+    const title = card.querySelector('h3').textContent.toLowerCase();
+    const search = (card.dataset.search || '').toLowerCase();
+    const combined = title + ' ' + search;
+    
+    for (const kw of keywords) {
+      if (combined.includes(kw.toLowerCase())) {
+        container.appendChild(card.cloneNode(true));
+        // Re-attach accordion handlers
+        container.querySelectorAll('.accordion-toggle').forEach(btn => {
+          btn.onclick = function() { toggleAccordion(this); };
+        });
+        break;
+      }
+    }
+  });
+}
+
+// ─── TYPE FILTER (Home tab) ───
+function filterType(btn, type) {
+  document.querySelectorAll('#homeFilter .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  
+  document.querySelectorAll('#allCards .card').forEach(card => {
+    if (type === 'all') { card.style.display = ''; return; }
+    card.style.display = card.dataset.type === type ? '' : 'none';
+  });
+}
+
+// ─── SEARCH ───
+function filterCards() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  document.querySelectorAll('#allCards .card').forEach(card => {
+    const title = card.querySelector('h3').textContent.toLowerCase();
+    const desc = card.querySelector('.card-desc').textContent.toLowerCase();
+    const search = (card.dataset.search || '').toLowerCase();
+    const match = !q || title.includes(q) || desc.includes(q) || search.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+  // Reset type filter
+  document.querySelectorAll('#homeFilter .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('#homeFilter .tab-btn').classList.add('active');
+}
+
+// ─── ACCORDION ───
+function toggleAccordion(btn) {
+  btn.classList.toggle('open');
+  const body = btn.nextElementSibling;
+  body.classList.toggle('open');
+}
+</script>
+</body>
+</html>
